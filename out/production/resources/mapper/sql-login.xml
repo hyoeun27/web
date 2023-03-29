@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.online.login.mapper.LoginMapper">
+    <select id="selectMembers" parameterType="String" resultType="board.login.dto.MembersDto">
+        SELECT user_no,
+        user_id,
+        AES_DECRYPT(UNHEX(user_pass), '${pkey}') user_pass,
+        user_name,
+        role_name,
+        enabled,
+        DATE_FORMAT(regist_date, '%Y-%m-%d') regist_date,
+        DATE_FORMAT(certification_date, '%Y-%m-%d') certification_date
+        FROM members
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insertMembers" parameterType="board.login.dto.MembersDto">
+        INSERT INTO members
+        (user_id, user_pwd, user_name, role_name, enabled, regist_date, certification_date)
+        VALUES (#{userId},
+        HEX(AES_ENCRYPT(#{userPass}, '${pkey}')),
+        #{userName},
+        'GUEST',
+        'N',
+        NOW(),
+        null)
+    </insert>
+
+    <insert id="insertMyInfo" parameterType="string">
+        INSERT INTO my_info
+        (user_no, user_level, risk_type, asset, `point`)
+        VALUES (#{userNo},
+        'BRONZE',
+        null,
+        '0',
+        '0')
+    </insert>
+
+    <update id="updateMembersCert" parameterType="board.login.dto.MembersDto">
+        UPDATE members
+        SET enabled = 'Y',
+        certification_date = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>
